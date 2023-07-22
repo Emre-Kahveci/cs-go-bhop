@@ -4,14 +4,13 @@ import time
 from pymem.process import *
 
 # offsets
-LOCAL_PLAYER = 14592396
-FORCE_JUMP = 86752472
-HEALTH = 256
-FLAGS = 260
+LOCAL_PLAYER = 0x00DEA98C
+FORCE_JUMP = 0x52BBCD8
+HEALTH = 0x100
+FLAGS = 0x104
 
 def bhop() -> None:
     pm = pymem.Pymem('csgo.exe')
-
     client = module_from_name(pm.process_handle, "client.dll").lpBaseOfDll
 
     # hack loop
@@ -22,21 +21,21 @@ def bhop() -> None:
         if not win32api.GetAsyncKeyState(0x20):
             continue
         
-        local_player = int(pm.read_uint(client + LOCAL_PLAYER))
         # if player is available
+        local_player = pm.read_int(client + LOCAL_PLAYER)
         if not local_player:
             continue
         
         # if alive
-        if not pm.read_uint(local_player + HEALTH):
+        if not pm.read_int(local_player + HEALTH):
             continue
 
         # if on the ground
-        if pm.read_uint(local_player + FLAGS) & 1 << 0:
+        if pm.read_int(local_player + FLAGS) & 1 << 0:
             # jump
-            pm.write_uint(client + FORCE_JUMP, 6)
+            pm.write_int(client + FORCE_JUMP, 6)
             time.sleep(.01)
-            pm.write_uint(client + FORCE_JUMP, 4)
+            pm.write_int(client + FORCE_JUMP, 4)
         
 if __name__ == "__main__":
     bhop()
