@@ -10,8 +10,8 @@ HEALTH = 0x100
 FLAGS = 0x104
 
 def bhop() -> None:
-    pm = pymem.Pymem('csgo.exe')
-    client = module_from_name(pm.process_handle, "client.dll").lpBaseOfDll
+    pm = pymem.Pymem('csgo.exe') # find the exe file
+    client = module_from_name(pm.process_handle, "client.dll").lpBaseOfDll # access client.dll
 
     # hack loop
     while True:
