@@ -4,10 +4,10 @@ import time
 from pymem.process import *
 
 # offsets
-LOCAL_PLAYER = 0x00DEA98C
-FORCE_JUMP = 0x52BBCD8
-HEALTH = 0x100
-FLAGS = 0x104
+localPlayer = 0x00DEA98C
+forceJump = 0x52BBCD8
+health = 0x100
+flags = 0x104
 
 def bhop() -> None:
     pm = pymem.Pymem('csgo.exe') # find the exe file
@@ -22,20 +22,20 @@ def bhop() -> None:
             continue
         
         # if player is available
-        local_player = pm.read_int(client + LOCAL_PLAYER)
+        local_player = pm.read_int(client + localPlayer)
         if not local_player:
             continue
         
         # if alive
-        if not pm.read_int(local_player + HEALTH):
+        if not pm.read_int(local_player + health):
             continue
 
         # if on the ground
-        if pm.read_int(local_player + FLAGS) & 1 << 0:
+        if pm.read_int(local_player + flags) & 1 << 0:
             # jump
-            pm.write_int(client + FORCE_JUMP, 6)
+            pm.write_int(client + forceJump, 6)
             time.sleep(.01)
-            pm.write_int(client + FORCE_JUMP, 4)
+            pm.write_int(client + forceJump, 4)
         
 if __name__ == "__main__":
     bhop()
