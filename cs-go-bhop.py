@@ -24,16 +24,16 @@ def bhop() -> None:
             continue
         
         # if player is available
-        local_player = pm.read_int(client + offsets["localPlayer"])
-        if not local_player:
+        localPlayer = pm.read_int(client + offsets["localPlayer"])
+        if not localPlayer:
             continue
         
         # if alive
-        if not pm.read_int(local_player + offsets["health"]):
+        if not pm.read_int(localPlayer + offsets["health"]):
             continue
 
         # if on the ground
-        if pm.read_int(local_player + offsets["flags"]) & 1 << 0:
+        if pm.read_int(localPlayer + offsets["flags"]) & 1 << 0:
             # jump
             pm.write_int(client + offsets["forceJump"], 6)
             time.sleep(.01)
