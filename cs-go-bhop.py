@@ -1,19 +1,21 @@
 import pymem
 import win32api
 import time
-from pymem.process import *
+import requests
 
-# Offsets
-offsets = {
-    'forceJump': 0x52BBCD8,
-    'localPlayer': 0xDEA98C,
-    'health': 0x100,
-    'flags': 0x104
-}
+def get_offset(url = "https://raw.githubusercontent.com/frk1/hazedumper/master/csgo.json"):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Check if the request was successful
+        json_data = response.json()
+        return json_data
+    except requests.exceptions.RequestException as e:
+        print(f"Error occurred while fetching the JSON file: {e}")
+        return None
 
-def bhop() -> None:
+def bhop(offsets = get_offset()) -> None:
     pm = pymem.Pymem('csgo.exe') # find the exe file
-    client = module_from_name(pm.process_handle, "client.dll").lpBaseOfDll # access client.dll
+    client = pymem.process.module_from_name(pm.process_handle, "client.dll").lpBaseOfDll # access client.dll
 
     # hack loop
     while True:
@@ -24,20 +26,20 @@ def bhop() -> None:
             continue
         
         # if player is available
-        localPlayer = pm.read_int(client + offsets["localPlayer"])
+        localPlayer = pm.read_int(client + offsets["signatures"]["dwLocalPlayer"])
         if not localPlayer:
             continue
         
         # if alive
-        if not pm.read_int(localPlayer + offsets["health"]):
+        if not pm.read_int(localPlayer + offsets["netvars"]["m_iHealth"]):
             continue
 
         # if on the ground
-        if pm.read_int(localPlayer + offsets["flags"]) & 1 << 0:
+        if pm.read_int(localPlayer + offsets["netvars"]["m_fFlags"]) & 1 << 0:
             # jump
-            pm.write_int(client + offsets["forceJump"], 6)
+            pm.write_int(client + offsets["signatures"]["dwForceJump"], 6)
             time.sleep(.01)
-            pm.write_int(client + offsets["forceJump"], 4)
+            pm.write_int(client + offsets["signatures"]["dwForceJump"], 4)
         
 if __name__ == "__main__":
     bhop()
